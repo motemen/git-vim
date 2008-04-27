@@ -2,6 +2,10 @@ if !exists('g:git_command_edit')
     let g:git_command_edit = 'new'
 endif
 
+if !exists('g:git_bufhidden')
+    let g:git_bufhidden = ''
+endif
+
 nnoremap <Leader>gd :GitDiff<Enter>
 nnoremap <Leader>gD :GitDiff!<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
@@ -58,7 +62,8 @@ function! s:OpenGitBuffer(content)
         execute g:git_command_edit
     endif
 
-    set buftype=nofile bufhidden=delete
+    set buftype=nofile
+    execute 'set bufhidden=' . g:git_bufhidden
 
     silent 0put=a:content
 
