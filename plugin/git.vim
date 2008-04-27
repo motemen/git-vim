@@ -3,6 +3,7 @@ if !exists('g:git_command_edit')
 endif
 
 nnoremap <Leader>gd :GitDiff<Enter>
+nnoremap <Leader>gs :GitStatus<Enter>
 
 " Returns current git branch.
 " Call inside 'statusline' or 'titlestring'.
@@ -26,11 +27,20 @@ endfunction
 
 " Show diff.
 function! GitDiff()
-    let diff_result = system('git diff ' . expand('%'))
+    let git_output = system('git diff ' . expand('%'))
     execute g:git_command_edit
     set buftype=nofile filetype=diff bufhidden=delete
-    silent 0put=diff_result
+    silent 0put=git_output
+endfunction
+
+" Show Status.
+function! GitStatus()
+    let git_output = system('git status')
+    execute g:git_command_edit
+    set buftype=nofile filetype=git-status bufhidden=delete
+    silent 0put=git_output
 endfunction
 
 command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
-command! GitDiff :call GitDiff()
+command! GitDiff    :call GitDiff()
+command! GitStatus  :call GitStatus()
