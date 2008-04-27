@@ -28,6 +28,11 @@ endfunction
 " Show diff.
 function! GitDiff()
     let git_output = system('git diff ' . expand('%'))
+    if !strlen(git_output)
+        echo "no output from git command"
+        return
+    endif
+
     execute g:git_command_edit
     set buftype=nofile filetype=diff bufhidden=delete
     silent 0put=git_output
