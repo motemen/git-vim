@@ -4,6 +4,7 @@ endif
 
 nnoremap <Leader>gd :GitDiff<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
+nnoremap <Leader>ga :GitAdd<Enter>
 
 " Returns current git branch.
 " Call inside 'statusline' or 'titlestring'.
@@ -46,6 +47,12 @@ function! GitStatus()
     silent 0put=git_output
 endfunction
 
+" Add file to index.
+function! GitAdd()
+    silent !git add %
+endfunction
+
 command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
 command! GitDiff    :call GitDiff()
 command! GitStatus  :call GitStatus()
+command! GitAdd     :call GitAdd()
