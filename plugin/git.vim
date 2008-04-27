@@ -34,22 +34,34 @@ function! GitDiff()
         return
     endif
 
-    execute g:git_command_edit
-    set buftype=nofile filetype=diff bufhidden=delete
-    silent 0put=git_output
+    call <SID>OpenGitBuffer(git_output)
+    set filetype=diff
 endfunction
 
 " Show Status.
 function! GitStatus()
     let git_output = system('git status')
-    execute g:git_command_edit
-    set buftype=nofile filetype=git-status bufhidden=delete
-    silent 0put=git_output
+    call <SID>OpenGitBuffer(git_output)
+    set filetype=git-status
 endfunction
 
 " Add file to index.
 function! GitAdd()
     silent !git add %
+endfunction
+
+function! s:OpenGitBuffer(content)
+    if exists('b:is_git_msg_buffer') && b:is_git_msg_buffer
+        enew!
+    else
+        execute g:git_command_edit
+    endif
+
+    set buftype=nofile bufhidden=delete
+
+    silent 0put=a:content
+
+    let b:is_git_msg_buffer = 1
 endfunction
 
 command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
