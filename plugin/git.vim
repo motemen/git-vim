@@ -9,6 +9,7 @@ endif
 nnoremap <Leader>gd :GitDiff<Enter>
 nnoremap <Leader>gD :GitDiff!<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
+nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
 
 " Returns current git branch.
@@ -65,6 +66,13 @@ function! GitStatus()
     set filetype=git-status
 endfunction
 
+" Show Log.
+function! GitLog()
+    let git_output = system('git log -- ' . expand('%'))
+    call <SID>OpenGitBuffer(git_output)
+    set filetype=git-log
+endfunction
+
 " Add file to index.
 function! GitAdd()
     silent !git add %
@@ -89,3 +97,4 @@ command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git 
 command! -bang GitDiff    :call GitDiff('<bang>')
 command! GitStatus  :call GitStatus()
 command! GitAdd     :call GitAdd()
+command! GitLog     :call GitLog()
