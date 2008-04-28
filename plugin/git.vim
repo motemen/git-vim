@@ -14,10 +14,25 @@ nnoremap <Leader>ga :GitAdd<Enter>
 " Returns current git branch.
 " Call inside 'statusline' or 'titlestring'.
 function! GitBranch()
-    let head_file = '.git/HEAD'
-    if !filereadable(head_file) | return '' | endif
-    let lines = readfile(head_file)
-    return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
+    if !exists('b:git_head_path')
+        let dir = matchstr(expand('%:p'), '.*\ze[\\/]')
+        while strlen(dir)
+            if filereadable(dir . '/.git/HEAD')
+                let b:git_head_path = dir . '/.git/HEAD'
+                break
+            endif
+            let dir = matchstr(dir, '.*\ze[\\/]')
+        endwhile
+        if !exists('b:git_head_path')
+            let b:git_head_path = ''
+        endif
+    endif
+    if strlen(b:git_head_path)
+        let lines = readfile(b:git_head_path)
+        return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
+    else
+        return ''
+    endif
 endfunction
 
 " List all git local branches.
