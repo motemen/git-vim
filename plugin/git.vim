@@ -11,6 +11,7 @@ nnoremap <Leader>gD :GitDiff!<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
 nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
+nnoremap <Leader>gc :GitCommit<Enter>
 
 " Returns current git branch.
 " Call inside 'statusline' or 'titlestring'.
@@ -78,6 +79,20 @@ function! GitAdd()
     silent !git add %
 endfunction
 
+" Commit.
+function! GitCommit()
+    let git_output = system('git status')
+    execute g:git_command_edit . ' `=tempname()`'
+    silent 0put=git_output
+    0
+    set filetype=git-status
+
+    augroup GitCommit
+        autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | set fileencoding=utf-8
+        autocmd BufWritePost <buffer> execute '!git commit -F %' | autocmd! GitCommit * <buffer>
+    augroup END
+endfunction
+
 function! s:OpenGitBuffer(content)
     if exists('b:is_git_msg_buffer') && b:is_git_msg_buffer
         enew!
@@ -89,6 +104,7 @@ function! s:OpenGitBuffer(content)
     execute 'set bufhidden=' . g:git_bufhidden
 
     silent 0put=a:content
+    0
 
     let b:is_git_msg_buffer = 1
 endfunction
@@ -98,3 +114,4 @@ command! -bang GitDiff    :call GitDiff('<bang>')
 command! GitStatus  :call GitStatus()
 command! GitAdd     :call GitAdd()
 command! GitLog     :call GitLog()
+command! GitCommit  :call GitCommit()
