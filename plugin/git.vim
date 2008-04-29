@@ -103,8 +103,8 @@ function! s:OpenGitBuffer(content)
     set buftype=nofile
     execute 'set bufhidden=' . g:git_bufhidden
 
-    silent 0put=a:content
-    0
+    silent put=a:content
+    0d
 
     let b:is_git_msg_buffer = 1
 endfunction
