@@ -7,7 +7,7 @@ if !exists('g:git_bufhidden')
 endif
 
 nnoremap <Leader>gd :GitDiff<Enter>
-nnoremap <Leader>gD :GitDiff!<Enter>
+nnoremap <Leader>gD :GitDiff --cached<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
 nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
@@ -49,8 +49,8 @@ function! ListGitBranches(arg_lead, cmd_line, cursor_pos)
 endfunction
 
 " Show diff.
-function! GitDiff(cached)
-    let git_output = system('git diff ' . (a:cached == '!' ? '--cached ' : '') . expand('%'))
+function! GitDiff(args)
+    let git_output = system('git diff ' . a:args . ' -- ' . expand('%'))
     if !strlen(git_output)
         echo "no output from git command"
         return
@@ -110,7 +110,7 @@ function! s:OpenGitBuffer(content)
 endfunction
 
 command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
-command! -bang GitDiff    :call GitDiff('<bang>')
+command! -nargs=* GitDiff    :call GitDiff(<q-args>)
 command! GitStatus  :call GitStatus()
 command! GitAdd     :call GitAdd()
 command! GitLog     :call GitLog()
