@@ -7,10 +7,11 @@ if !exists('g:git_bufhidden')
 endif
 
 nnoremap <Leader>gd :GitDiff<Enter>
-nnoremap <Leader>gD :GitDiff!<Enter>
+nnoremap <Leader>gD :GitDiff --cached<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
 nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
+nnoremap <Leader>gc :GitCommit<Enter>
 
 " Returns current git branch.
 " Call inside 'statusline' or 'titlestring'.
@@ -48,8 +49,8 @@ function! ListGitBranches(arg_lead, cmd_line, cursor_pos)
 endfunction
 
 " Show diff.
-function! GitDiff(cached)
-    let git_output = system('git diff ' . (a:cached == '!' ? '--cached ' : '') . s:Expand('%'))
+function! GitDiff(args)
+    let git_output = system('git diff ' . a:args . ' -- ' . expand('%'))
     if !strlen(git_output)
         echo "no output from git command"
         return
@@ -78,6 +79,20 @@ function! GitAdd()
     silent !git add %
 endfunction
 
+" Commit.
+function! GitCommit()
+    let git_output = system('git status')
+    execute g:git_command_edit . ' `=tempname()`'
+    silent 0put=git_output
+    0
+    set filetype=git-status
+
+    augroup GitCommit
+        autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | set fileencoding=utf-8
+        autocmd BufWritePost <buffer> execute '!git commit -F %' | autocmd! GitCommit * <buffer>
+    augroup END
+endfunction
+
 function! s:OpenGitBuffer(content)
     if exists('b:is_git_msg_buffer') && b:is_git_msg_buffer
         enew!
@@ -88,7 +103,8 @@ function! s:OpenGitBuffer(content)
     set buftype=nofile
     execute 'set bufhidden=' . g:git_bufhidden
 
-    silent 0put=a:content
+    silent put=a:content
+    keepjumps 0d
 
     let b:is_git_msg_buffer = 1
 endfunction
@@ -102,7 +118,8 @@ function! s:Expand(expr)
 endfunction
 
 command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
-command! -bang GitDiff    :call GitDiff('<bang>')
+command! -nargs=* GitDiff    :call GitDiff(<q-args>)
 command! GitStatus  :call GitStatus()
 command! GitAdd     :call GitAdd()
 command! GitLog     :call GitLog()
+command! GitCommit  :call GitCommit()
