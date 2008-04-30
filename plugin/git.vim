@@ -16,7 +16,7 @@ nnoremap <Leader>ga :GitAdd<Enter>
 " Call inside 'statusline' or 'titlestring'.
 function! GitBranch()
     if !exists('b:git_head_path')
-        let dir = matchstr(expand('%:p'), '.*\ze[\\/]')
+        let dir = matchstr(s:Expand('%:p'), '.*\ze[\\/]')
         while strlen(dir)
             if filereadable(dir . '/.git/HEAD')
                 let b:git_head_path = dir . '/.git/HEAD'
@@ -49,7 +49,7 @@ endfunction
 
 " Show diff.
 function! GitDiff(cached)
-    let git_output = system('git diff ' . (a:cached == '!' ? '--cached ' : '') . expand('%'))
+    let git_output = system('git diff ' . (a:cached == '!' ? '--cached ' : '') . s:Expand('%'))
     if !strlen(git_output)
         echo "no output from git command"
         return
@@ -68,7 +68,7 @@ endfunction
 
 " Show Log.
 function! GitLog()
-    let git_output = system('git log -- ' . expand('%'))
+    let git_output = system('git log -- ' . s:Expand('%'))
     call <SID>OpenGitBuffer(git_output)
     set filetype=git-log
 endfunction
@@ -91,6 +91,14 @@ function! s:OpenGitBuffer(content)
     silent 0put=a:content
 
     let b:is_git_msg_buffer = 1
+endfunction
+
+function! s:Expand(expr)
+    if has('win32')
+        return substitute(expand(a:expr), '\', '/', 'g')
+    else
+        return expand(a:expr)
+    endif
 endfunction
 
 command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
