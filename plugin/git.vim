@@ -11,7 +11,7 @@ nnoremap <Leader>gD :GitDiff --cached<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
 nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
-nnoremap <Leader>gA :execute 'GitAdd ' . expand('<cfile>')<Enter>
+nnoremap <Leader>gA :GitAdd <cfile><Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
 
 " Returns current git branch.
@@ -76,12 +76,8 @@ function! GitLog()
 endfunction
 
 " Add file to index.
-function! GitAdd(file)
-    if strlen(a:file)
-        let file = a:file
-    else
-        let file = expand('%')
-    endif
+function! GitAdd(expr)
+    let file = expand(strlen(a:expr) ? a:expr : '%')
 
     silent execute '!git add ' . file
 
