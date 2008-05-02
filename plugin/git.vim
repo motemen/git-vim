@@ -11,6 +11,7 @@ nnoremap <Leader>gD :GitDiff --cached<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
 nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
+nnoremap <Leader>gA :execute 'GitAdd ' . expand('<cfile>')<Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
 
 " Returns current git branch.
@@ -52,7 +53,7 @@ endfunction
 function! GitDiff(args)
     let git_output = system('git diff ' . a:args . ' -- ' . expand('%'))
     if !strlen(git_output)
-        echo "no output from git command"
+        echo "No output from git command"
         return
     endif
 
@@ -75,8 +76,18 @@ function! GitLog()
 endfunction
 
 " Add file to index.
-function! GitAdd()
-    silent !git add %
+function! GitAdd(file)
+    if strlen(a:file)
+        let file = a:file
+    else
+        let file = expand('%')
+    endif
+
+    silent execute '!git add ' . file
+
+    if !v:shell_error
+        echo 'Added ' . file . ' to index'
+    endif
 endfunction
 
 " Commit.
@@ -119,7 +130,7 @@ endfunction
 
 command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
 command! -nargs=* GitDiff    :call GitDiff(<q-args>)
-command! GitStatus  :call GitStatus()
-command! GitAdd     :call GitAdd()
-command! GitLog     :call GitLog()
-command! GitCommit  :call GitCommit()
+command!          GitStatus  :call GitStatus()
+command! -nargs=? GitAdd     :call GitAdd(<q-args>)
+command!          GitLog     :call GitLog()
+command!          GitCommit  :call GitCommit()
