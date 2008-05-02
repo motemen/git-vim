@@ -51,7 +51,7 @@ endfunction
 
 " Show diff.
 function! GitDiff(args)
-    let git_output = system('git diff ' . a:args . ' -- ' . expand('%'))
+    let git_output = system('git diff ' . a:args . ' -- ' . s:Expand('%'))
     if !strlen(git_output)
         echo "No output from git command"
         return
@@ -77,7 +77,7 @@ endfunction
 
 " Add file to index.
 function! GitAdd(expr)
-    let file = expand(strlen(a:expr) ? a:expr : '%')
+    let file = s:Expand(strlen(a:expr) ? a:expr : '%')
 
     silent execute '!git add ' . file
 
