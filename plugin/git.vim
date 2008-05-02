@@ -49,6 +49,21 @@ function! ListGitBranches(arg_lead, cmd_line, cursor_pos)
     return branches
 endfunction
 
+" List all git commits.
+function! ListGitCommits(arg_lead, cmd_line, cursor_pos)
+    let commits = split(system('git log --pretty=format:%h'))
+    let commits = ['HEAD'] + ListGitBranches(a:arg_lead, a:cmd_line, a:cursor_pos) + commits
+
+    if a:cmd_line =~ '^GitDiff'
+        " GitDiff accepts <commit>..<commit>
+        if a:arg_lead[-2:] == '..'
+            let commits = map(commits, 'a:arg_lead . v:val')
+        endif
+    endif
+
+    return commits
+endfunction
+
 " Show diff.
 function! GitDiff(args)
     let git_output = system('git diff ' . a:args . ' -- ' . s:Expand('%'))
@@ -124,8 +139,8 @@ function! s:Expand(expr)
     endif
 endfunction
 
-command! -nargs=1 -complete=customlist,ListGitBranches GitCheckout :silent !git checkout <args>
-command! -nargs=* GitDiff    :call GitDiff(<q-args>)
+command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout :silent !git checkout <args>
+command! -nargs=* -complete=customlist,ListGitCommits GitDiff    :call GitDiff(<q-args>)
 command!          GitStatus  :call GitStatus()
 command! -nargs=? GitAdd     :call GitAdd(<q-args>)
 command!          GitLog     :call GitLog()
