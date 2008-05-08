@@ -105,9 +105,9 @@ endfunction
 function! GitCommit()
     let git_output = system('git status')
     execute g:git_command_edit . ' `=tempname()`'
-    silent 0put=git_output
-    0
-    set filetype=git-status
+    silent put=git_output
+    keepjumps 0d
+    set filetype=git-status bufhidden=delete
 
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | set fileencoding=utf-8
