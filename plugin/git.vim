@@ -56,12 +56,13 @@ function! ListGitCommits(arg_lead, cmd_line, cursor_pos)
 
     if a:cmd_line =~ '^GitDiff'
         " GitDiff accepts <commit>..<commit>
-        if a:arg_lead[-2:] == '..'
-            let commits = map(commits, 'a:arg_lead . v:val')
+        if a:arg_lead =~ '\.\.'
+            let pre = matchstr(a:arg_lead, '.*\.\.\ze')
+            let commits = map(commits, 'pre . v:val')
         endif
     endif
 
-    return commits
+    return filter(commits, 'match(v:val, ''\v'' . a:arg_lead) == 0')
 endfunction
 
 " Show diff.
