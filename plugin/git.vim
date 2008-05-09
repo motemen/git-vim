@@ -122,6 +122,7 @@ endfunction
 " Checkout.
 function! GitCheckout(args)
     let git_output = system('git checkout ' . a:args)
+    let git_output = substitute(git_output, '\n*$', '', '')
     if v:shell_error
         echohl Error
         echo git_output
