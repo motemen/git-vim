@@ -18,12 +18,14 @@ nnoremap <Leader>gc :GitCommit<Enter>
 " Call inside 'statusline' or 'titlestring'.
 function! GitBranch()
     if !exists('b:git_dir')
-        let b:git_dir = finddir('.git', expand('%:p:h') . ';')
+        let b:git_dir = finddir('.git', expand('%:p:h') . ';/')
     endif
 
     if strlen(b:git_dir)
-        let lines = readfile(b:git_dir . '/HEAD')
-        return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
+        if filereadable(b:git_dir . '/HEAD')
+            let lines = readfile(b:git_dir . '/HEAD')
+            return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
+        endif
     else
         return ''
     endif
