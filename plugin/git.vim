@@ -19,13 +19,14 @@ nnoremap <Leader>gc :GitCommit<Enter>
 function! GitBranch()
     if !exists('b:git_dir')
         let b:git_dir = finddir('.git', expand('%:p:h') . ';/')
+        if strlen(b:git_dir)
+            let b:git_dir = fnamemodify(b:git_dir, ':p')
+        endif
     endif
 
-    if strlen(b:git_dir)
-        if filereadable(b:git_dir . '/HEAD')
-            let lines = readfile(b:git_dir . '/HEAD')
-            return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
-        endif
+    if strlen(b:git_dir) && filereadable(b:git_dir . 'HEAD')
+        let lines = readfile(b:git_dir . 'HEAD')
+        return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
     else
         return ''
     endif
