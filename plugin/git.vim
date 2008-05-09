@@ -17,24 +17,12 @@ nnoremap <Leader>gc :GitCommit<Enter>
 " Returns current git branch.
 " Call inside 'statusline' or 'titlestring'.
 function! GitBranch()
-    if !exists('b:git_head_path')
-        let paths = split(s:Expand('%:p:h'), '/')
-        while len(paths)
-            let dir = join(paths, '/')
-            if filereadable(dir . '/.git/HEAD')
-                let b:git_head_path = dir . '/.git/HEAD'
-                break
-            endif
-            call remove(paths, -1)
-        endwhile
-
-        if !exists('b:git_head_path')
-            let b:git_head_path = ''
-        endif
+    if !exists('b:git_dir')
+        let b:git_dir = finddir('.git', expand('%:p:h') . ';')
     endif
 
-    if strlen(b:git_head_path)
-        let lines = readfile(b:git_head_path)
+    if strlen(b:git_dir)
+        let lines = readfile(b:git_dir . '/HEAD')
         return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
     else
         return ''
