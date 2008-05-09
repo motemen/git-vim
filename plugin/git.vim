@@ -18,18 +18,21 @@ nnoremap <Leader>gc :GitCommit<Enter>
 " Call inside 'statusline' or 'titlestring'.
 function! GitBranch()
     if !exists('b:git_head_path')
-        let dir = matchstr(s:Expand('%:p'), '.*\ze[\\/]')
-        while strlen(dir)
+        let paths = split(s:Expand('%:p:h'), '/')
+        while len(paths)
+            let dir = join(paths, '/')
             if filereadable(dir . '/.git/HEAD')
                 let b:git_head_path = dir . '/.git/HEAD'
                 break
             endif
-            let dir = matchstr(dir, '.*\ze[\\/]')
+            call remove(paths, -1)
         endwhile
+
         if !exists('b:git_head_path')
             let b:git_head_path = ''
         endif
     endif
+
     if strlen(b:git_head_path)
         let lines = readfile(b:git_head_path)
         return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
