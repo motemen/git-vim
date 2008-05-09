@@ -119,6 +119,18 @@ function! GitCommit()
     augroup END
 endfunction
 
+" Checkout.
+function! GitCheckout(args)
+    let git_output = system('git checkout ' . a:args)
+    if v:shell_error
+        echohl Error
+        echo git_output
+        echohl None
+    else
+        echo git_output
+    endif
+endfunction
+
 function! s:OpenGitBuffer(content)
     if exists('b:is_git_msg_buffer') && b:is_git_msg_buffer
         enew!
@@ -143,8 +155,8 @@ function! s:Expand(expr)
     endif
 endfunction
 
-command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout :silent !git checkout <args>
-command! -nargs=* -complete=customlist,ListGitCommits GitDiff    :call GitDiff(<q-args>)
+command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout :call GitCheckout(<q-args>)
+command! -nargs=* -complete=customlist,ListGitCommits GitDiff     :call GitDiff(<q-args>)
 command!          GitStatus  :call GitStatus()
 command! -nargs=? GitAdd     :call GitAdd(<q-args>)
 command!          GitLog     :call GitLog()
