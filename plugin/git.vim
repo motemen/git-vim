@@ -130,6 +130,26 @@ function! GitDoCommand(args)
     endif
 endfunction
 
+" Show vimdiff for merge. (experimental)
+function! GitVimDiffMerge()
+    let file = s:Expand('%')
+    let filetype = &filetype
+
+    top new
+    set buftype=nofile
+    execute 'silent read!git show :2:' . file
+    0d
+    diffthis
+    let &filetype = filetype
+
+    rightbelow vnew
+    set buftype=nofile
+    execute 'silent read!git show :3:' . file
+    0d
+    diffthis
+    let &filetype = filetype
+endfunction
+
 function! s:OpenGitBuffer(content)
     if exists('b:is_git_msg_buffer') && b:is_git_msg_buffer
         enew!
@@ -156,8 +176,9 @@ endfunction
 
 command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitCheckout(<q-args>)
 command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
-command!          GitStatus call GitStatus()
-command! -nargs=? GitAdd    call GitAdd(<q-args>)
-command!          GitLog    call GitLog()
-command!          GitCommit call GitCommit()
-command! -nargs=+ Git       call GitDoCommand(<q-args>)
+command!          GitStatus        call GitStatus()
+command! -nargs=? GitAdd           call GitAdd(<q-args>)
+command!          GitLog           call GitLog()
+command!          GitCommit        call GitCommit()
+command!          GitVimDiffMerge  call GitVimDiffMerge()
+command! -nargs=+ Git              call GitDoCommand(<q-args>)
