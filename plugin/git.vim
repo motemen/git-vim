@@ -34,18 +34,21 @@ endfunction
 
 " List all git local branches.
 function! ListGitBranches(arg_lead, cmd_line, cursor_pos)
-    let branchs = split(system('git branch'))
-    if branchs[0] == 'fatal:'
-        let branches = []
-    else
-        let branches = filter(split(system('git branch')), 'v:val != "*"')
+    let branches = split(system('git branch'), '\n')
+    if v:shell_error
+        return []
     endif
-    return branches
+
+    return map(branches, 'matchstr(v:val, ''^[* ] \zs.*'')')
 endfunction
 
 " List all git commits.
 function! ListGitCommits(arg_lead, cmd_line, cursor_pos)
     let commits = split(system('git log --pretty=format:%h'))
+    if v:shell_error
+        return []
+    endif
+
     let commits = ['HEAD'] + ListGitBranches(a:arg_lead, a:cmd_line, a:cursor_pos) + commits
 
     if a:cmd_line =~ '^GitDiff'
