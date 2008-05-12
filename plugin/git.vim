@@ -115,7 +115,11 @@ endfunction
 
 " Checkout.
 function! GitCheckout(args)
-    let git_output = system('git checkout ' . a:args)
+    call GitDoCommand('checkout ' . a:args)
+endfunction
+
+function! GitDoCommand(args)
+    let git_output = system('git ' . a:args)
     let git_output = substitute(git_output, '\n*$', '', '')
     if v:shell_error
         echohl Error
@@ -152,7 +156,8 @@ endfunction
 
 command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitCheckout(<q-args>)
 command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
-command!          GitStatus  call GitStatus()
-command! -nargs=? GitAdd     call GitAdd(<q-args>)
-command!          GitLog     call GitLog()
-command!          GitCommit  call GitCommit()
+command!          GitStatus call GitStatus()
+command! -nargs=? GitAdd    call GitAdd(<q-args>)
+command!          GitLog    call GitLog()
+command!          GitCommit call GitCommit()
+command! -nargs=+ Git       call GitDoCommand(<q-args>)
