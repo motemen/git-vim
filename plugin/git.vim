@@ -109,7 +109,7 @@ function! GitCommit()
 
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | set fileencoding=utf-8
-        autocmd BufWritePost <buffer> execute '!git commit -F %' | autocmd! GitCommit * <buffer>
+        autocmd BufWritePost <buffer> call GitDoCommand('commit -F ' . expand('%')) | autocmd! GitCommit * <buffer>
     augroup END
 endfunction
 
