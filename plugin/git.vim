@@ -105,7 +105,7 @@ function! GitCommit()
     execute g:git_command_edit . ' `=tempname()`'
     silent put=git_output
     keepjumps 0d
-    set filetype=git-status bufhidden=delete
+    set filetype=git-status bufhidden=wipe
 
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | set fileencoding=utf-8
