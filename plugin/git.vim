@@ -134,9 +134,13 @@ endfunction
 function! GitVimDiffMerge()
     let file = s:Expand('%')
     let filetype = &filetype
+    let t:git_vimdiff_original_bufnr = bufnr('%')
+    let t:git_vimdiff_buffers = []
 
-    top new
+    topleft new
     set buftype=nofile
+    file `=':2:' . file`
+    call add(t:git_vimdiff_buffers, bufnr('%'))
     execute 'silent read!git show :2:' . file
     0d
     diffthis
@@ -144,10 +148,30 @@ function! GitVimDiffMerge()
 
     rightbelow vnew
     set buftype=nofile
+    file `=':3:' . file`
+    call add(t:git_vimdiff_buffers, bufnr('%'))
     execute 'silent read!git show :3:' . file
     0d
     diffthis
     let &filetype = filetype
+endfunction
+
+function! GitVimDiffMergeDone()
+    if exists('t:git_vimdiff_original_bufnr') && exists('t:git_vimdiff_buffers')
+        if getbufline(t:git_vimdiff_buffers[0], 1, '$') == getbufline(t:git_vimdiff_buffers[1], 1, '$')
+            execute 'sbuffer ' . t:git_vimdiff_original_bufnr
+            0put=getbufline(t:git_vimdiff_buffers[0], 1, '$')
+            normal! jdG
+            update
+            execute 'bdelete ' . t:git_vimdiff_buffers[0]
+            execute 'bdelete ' . t:git_vimdiff_buffers[1]
+            close
+        else
+            echohl Error
+            echo 'There still remains conflict'
+            echohl None
+        endif
+    endif
 endfunction
 
 function! s:OpenGitBuffer(content)
@@ -180,5 +204,6 @@ command!          GitStatus        call GitStatus()
 command! -nargs=? GitAdd           call GitAdd(<q-args>)
 command!          GitLog           call GitLog()
 command!          GitCommit        call GitCommit()
-command!          GitVimDiffMerge  call GitVimDiffMerge()
 command! -nargs=+ Git              call GitDoCommand(<q-args>)
+command!          GitVimDiffMerge     call GitVimDiffMerge()
+command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
