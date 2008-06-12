@@ -104,7 +104,7 @@ function! GitCommit()
     let git_output = system('git status')
     call <SID>OpenGitBuffer(git_output)
     file `=tempname()`
-    set filetype=git-status buftype=
+    set filetype=git-status buftype= noreadonly modifiable bufhidden=wipe
 
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | set fileencoding=utf-8
@@ -180,7 +180,7 @@ function! s:OpenGitBuffer(content)
         execute g:git_command_edit
     endif
 
-    set buftype=nofile
+    set buftype=nofile readonly nomodifiable
     execute 'set bufhidden=' . g:git_bufhidden
 
     silent put=a:content
