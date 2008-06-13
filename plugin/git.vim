@@ -71,21 +71,21 @@ function! GitDiff(args)
     endif
 
     call <SID>OpenGitBuffer(git_output)
-    set filetype=diff
+    setlocal filetype=diff
 endfunction
 
 " Show Status.
 function! GitStatus()
     let git_output = system('git status')
     call <SID>OpenGitBuffer(git_output)
-    set filetype=git-status
+    setlocal filetype=git-status
 endfunction
 
 " Show Log.
 function! GitLog()
     let git_output = system('git log -- ' . s:Expand('%'))
     call <SID>OpenGitBuffer(git_output)
-    set filetype=git-log
+    setlocal filetype=git-log
 endfunction
 
 " Add file to index.
@@ -104,10 +104,10 @@ function! GitCommit()
     let git_output = system('git status')
     call <SID>OpenGitBuffer(git_output)
     file `=tempname()`
-    set filetype=git-status buftype= noreadonly modifiable bufhidden=wipe
+    setlocal filetype=git-status buftype= noreadonly modifiable bufhidden=wipe
 
     augroup GitCommit
-        autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | set fileencoding=utf-8
+        autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | setlocal fileencoding=utf-8
         autocmd BufWritePost <buffer> call GitDoCommand('commit -F ' . expand('%')) | autocmd! GitCommit * <buffer>
     augroup END
 endfunction
@@ -137,7 +137,7 @@ function! GitVimDiffMerge()
     let t:git_vimdiff_buffers = []
 
     topleft new
-    set buftype=nofile
+    setlocal buftype=nofile
     file `=':2:' . file`
     call add(t:git_vimdiff_buffers, bufnr('%'))
     execute 'silent read!git show :2:' . file
@@ -146,7 +146,7 @@ function! GitVimDiffMerge()
     let &filetype = filetype
 
     rightbelow vnew
-    set buftype=nofile
+    setlocal buftype=nofile
     file `=':3:' . file`
     call add(t:git_vimdiff_buffers, bufnr('%'))
     execute 'silent read!git show :3:' . file
@@ -180,11 +180,12 @@ function! s:OpenGitBuffer(content)
         execute g:git_command_edit
     endif
 
-    set buftype=nofile readonly nomodifiable
-    execute 'set bufhidden=' . g:git_bufhidden
+    setlocal buftype=nofile readonly modifiable
+    execute 'setlocal bufhidden=' . g:git_bufhidden
 
     silent put=a:content
     keepjumps 0d
+    setlocal nomodifiable
 
     let b:is_git_msg_buffer = 1
 endfunction
