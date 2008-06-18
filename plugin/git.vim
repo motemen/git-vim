@@ -79,6 +79,7 @@ function! GitStatus()
     let git_output = system('git status')
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-status
+    nnoremap <buffer> <CR> :GitAdd <cfile><CR>
 endfunction
 
 " Show Log.
@@ -92,11 +93,7 @@ endfunction
 function! GitAdd(expr)
     let file = s:Expand(strlen(a:expr) ? a:expr : '%')
 
-    silent execute '!git add ' . file
-
-    if !v:shell_error
-        echo 'Added ' . file . ' to index'
-    endif
+    call GitDoCommand('add ' . file)
 endfunction
 
 " Commit.
