@@ -117,6 +117,19 @@ function! GitCheckout(args)
     call GitDoCommand('checkout ' . a:args)
 endfunction
 
+" Show commit, tree, blobs.
+function! GitCatFile(file)
+    let file = s:Expand(a:file)
+    "let file_type  = system('git cat-file -t ' . file)
+    let git_output = system('git cat-file -p ' . file)
+    if !strlen(git_output)
+        echo "No output from git command"
+        return
+    endif
+
+    call <SID>OpenGitBuffer(git_output)
+endfunction
+
 function! GitDoCommand(args)
     let git_output = system('git ' . a:args)
     let git_output = substitute(git_output, '\n*$', '', '')
@@ -200,10 +213,11 @@ endfunction
 
 command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitCheckout(<q-args>)
 command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
-command!          GitStatus        call GitStatus()
-command! -nargs=? GitAdd           call GitAdd(<q-args>)
-command!          GitLog           call GitLog()
-command!          GitCommit        call GitCommit()
-command! -nargs=+ Git              call GitDoCommand(<q-args>)
+command!          GitStatus           call GitStatus()
+command! -nargs=? GitAdd              call GitAdd(<q-args>)
+command!          GitLog              call GitLog()
+command!          GitCommit           call GitCommit()
+command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
+command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
