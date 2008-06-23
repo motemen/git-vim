@@ -97,15 +97,18 @@ function! GitAdd(expr)
 endfunction
 
 " Commit.
-function! GitCommit()
-    let git_output = system('git status')
-    call <SID>OpenGitBuffer(git_output)
-    file `=tempname()`
-    setlocal filetype=git-status buftype= noreadonly modifiable bufhidden=wipe
+function! GitCommit(args)
+    " Create COMMIT_EDITMSG file
+    let editor_save = $EDITOR
+    let $EDITOR = ''
+    call system('git commit' . a:args)
+    let $EDITOR = editor_save
 
+    execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, b:git_dir)
+    setlocal filetype=git-status bufhidden=wipe
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | setlocal fileencoding=utf-8
-        autocmd BufWritePost <buffer> call GitDoCommand('commit -F ' . expand('%')) | autocmd! GitCommit * <buffer>
+        execute printf("autocmd BufWritePost <buffer> call GitDoCommand('commit %s -F ' . expand('%%')) | autocmd! GitCommit * <buffer>", a:args)
     augroup END
 endfunction
 
@@ -213,7 +216,7 @@ command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<
 command!          GitStatus           call GitStatus()
 command! -nargs=? GitAdd              call GitAdd(<q-args>)
 command!          GitLog              call GitLog()
-command!          GitCommit           call GitCommit()
+command! -nargs=* GitCommit           call GitCommit(<q-args>)
 command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
