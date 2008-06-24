@@ -101,7 +101,7 @@ function! GitCommit(args)
     " Create COMMIT_EDITMSG file
     let editor_save = $EDITOR
     let $EDITOR = ''
-    call system('git commit' . a:args)
+    call system('git commit ' . a:args)
     let $EDITOR = editor_save
 
     execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, b:git_dir)
