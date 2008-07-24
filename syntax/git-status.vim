@@ -1,5 +1,5 @@
 runtime syntax/diff.vim
-set filetype=
+setlocal filetype=
 
 syntax match gitStatusComment   +^#.*+ contains=ALL
 
