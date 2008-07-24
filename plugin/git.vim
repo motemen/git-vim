@@ -83,8 +83,8 @@ function! GitStatus()
 endfunction
 
 " Show Log.
-function! GitLog()
-    let git_output = system('git log -- ' . s:Expand('%'))
+function! GitLog(args)
+    let git_output = system('git log ' . a:args . ' -- ' . s:Expand('%'))
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-log
 endfunction
@@ -215,7 +215,7 @@ command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitChecko
 command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
 command!          GitStatus           call GitStatus()
 command! -nargs=? GitAdd              call GitAdd(<q-args>)
-command!          GitLog              call GitLog()
+command! -nargs=* GitLog              call GitLog(<q-args>)
 command! -nargs=* GitCommit           call GitCommit(<q-args>)
 command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
