@@ -85,7 +85,14 @@ function! GitStatus()
     let git_output = system('git status')
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-status
-    nnoremap <buffer> <CR> :GitAdd <cfile><CR>
+    nnoremap <buffer> <Enter> :GitAdd <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
+    nnoremap <buffer> -       :silent !git reset HEAD -- =expand('<cfile>')<Enter><Enter>:call <SID>RefreshGitStatus()<Enter>
+endfunction
+
+function! s:RefreshGitStatus()
+    let pos_save = getpos('.')
+    GitStatus
+    call setpos('.', pos_save)
 endfunction
 
 " Show Log.
