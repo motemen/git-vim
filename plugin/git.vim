@@ -14,18 +14,24 @@ nnoremap <Leader>ga :GitAdd<Enter>
 nnoremap <Leader>gA :GitAdd <cfile><Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
 
-" Returns current git branch.
-" Call inside 'statusline' or 'titlestring'.
-function! GitBranch()
+" Ensure b:git_dir exists.
+function! s:GetGitDir()
     if !exists('b:git_dir')
         let b:git_dir = finddir('.git', expand('%:p:h') . ';/')
         if strlen(b:git_dir)
             let b:git_dir = fnamemodify(b:git_dir, ':p')
         endif
     endif
+    return b:git_dir
+endfunction
 
-    if strlen(b:git_dir) && filereadable(b:git_dir . 'HEAD')
-        let lines = readfile(b:git_dir . 'HEAD')
+" Returns current git branch.
+" Call inside 'statusline' or 'titlestring'.
+function! GitBranch()
+    let git_dir = <SID>GetGitDir()
+
+    if strlen(git_dir) && filereadable(git_dir . 'HEAD')
+        let lines = readfile(git_dir . 'HEAD')
         return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
     else
         return ''
@@ -98,13 +104,15 @@ endfunction
 
 " Commit.
 function! GitCommit(args)
+    let git_dir = <SID>GetGitDir()
+
     " Create COMMIT_EDITMSG file
     let editor_save = $EDITOR
     let $EDITOR = ''
     call system('git commit ' . a:args)
     let $EDITOR = editor_save
 
-    execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, b:git_dir)
+    execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, git_dir)
     setlocal filetype=git-status bufhidden=wipe
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | setlocal fileencoding=utf-8
