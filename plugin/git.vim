@@ -17,9 +17,9 @@ nnoremap <Leader>gc :GitCommit<Enter>
 " Ensure b:git_dir exists.
 function! s:GetGitDir()
     if !exists('b:git_dir')
-        let b:git_dir = finddir('.git', expand('%:p:h') . ';/')
-        if strlen(b:git_dir)
-            let b:git_dir = fnamemodify(b:git_dir, ':p')
+        let b:git_dir = system('git rev-parse --git-dir')
+        if !v:shell_error
+            let b:git_dir = fnamemodify(split(b:git_dir, "\n")[0], ':p') . '/'
         endif
     endif
     return b:git_dir
