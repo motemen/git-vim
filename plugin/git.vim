@@ -6,6 +6,10 @@ if !exists('g:git_bufhidden')
     let g:git_bufhidden = ''
 endif
 
+if !exists('g:git_bin')
+    let g:git_bin = 'git'
+endif
+
 nnoremap <Leader>gd :GitDiff<Enter>
 nnoremap <Leader>gD :GitDiff --cached<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
@@ -17,7 +21,7 @@ nnoremap <Leader>gc :GitCommit<Enter>
 " Ensure b:git_dir exists.
 function! s:GetGitDir()
     if !exists('b:git_dir')
-        let b:git_dir = system('git rev-parse --git-dir')
+        let b:git_dir = s:SystemGit('rev-parse --git-dir')
         if !v:shell_error
             let b:git_dir = fnamemodify(split(b:git_dir, "\n")[0], ':p') . '/'
         endif
@@ -40,7 +44,7 @@ endfunction
 
 " List all git local branches.
 function! ListGitBranches(arg_lead, cmd_line, cursor_pos)
-    let branches = split(system('git branch'), '\n')
+    let branches = split(s:SystemGit('branch'), '\n')
     if v:shell_error
         return []
     endif
@@ -50,7 +54,7 @@ endfunction
 
 " List all git commits.
 function! ListGitCommits(arg_lead, cmd_line, cursor_pos)
-    let commits = split(system('git log --pretty=format:%h'))
+    let commits = split(s:SystemGit('log --pretty=format:%h'))
     if v:shell_error
         return []
     endif
@@ -70,7 +74,7 @@ endfunction
 
 " Show diff.
 function! GitDiff(args)
-    let git_output = system('git diff ' . a:args . ' -- ' . s:Expand('%'))
+    let git_output = s:SystemGit('diff ' . a:args . ' -- ' . s:Expand('%'))
     if !strlen(git_output)
         echo "No output from git command"
         return
@@ -82,7 +86,7 @@ endfunction
 
 " Show Status.
 function! GitStatus()
-    let git_output = system('git status')
+    let git_output = s:SystemGit('status')
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-status
     nnoremap <buffer> <Enter> :GitAdd <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
@@ -97,7 +101,7 @@ endfunction
 
 " Show Log.
 function! GitLog(args)
-    let git_output = system('git log ' . a:args . ' -- ' . s:Expand('%'))
+    let git_output = s:SystemGit('log ' . a:args . ' -- ' . s:Expand('%'))
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-log
 endfunction
@@ -116,7 +120,7 @@ function! GitCommit(args)
     " Create COMMIT_EDITMSG file
     let editor_save = $EDITOR
     let $EDITOR = ''
-    call system('git commit ' . a:args)
+    let git_output = s:SystemGit('commit ' . a:args)
     let $EDITOR = editor_save
 
     execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, git_dir)
@@ -135,8 +139,8 @@ endfunction
 " Show commit, tree, blobs.
 function! GitCatFile(file)
     let file = s:Expand(a:file)
-    "let file_type  = system('git cat-file -t ' . file)
-    let git_output = system('git cat-file -p ' . file)
+    "let file_type  = s:SystemGit('cat-file -t ' . file)
+    let git_output = s:SystemGit('cat-file -p ' . file)
     if !strlen(git_output)
         echo "No output from git command"
         return
@@ -146,7 +150,7 @@ function! GitCatFile(file)
 endfunction
 
 function! GitDoCommand(args)
-    let git_output = system('git ' . a:args)
+    let git_output = s:SystemGit(a:args)
     let git_output = substitute(git_output, '\n*$', '', '')
     if v:shell_error
         echohl Error
@@ -155,6 +159,10 @@ function! GitDoCommand(args)
     else
         echo git_output
     endif
+endfunction
+
+function! s:SystemGit(args)
+    return system(g:git_bin . ' ' . a:args)
 endfunction
 
 " Show vimdiff for merge. (experimental)
