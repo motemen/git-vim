@@ -117,17 +117,23 @@ endfunction
 function! GitCommit(args)
     let git_dir = <SID>GetGitDir()
 
+    let args = a:args
+
+    if args !~ '\v\k@<!(-a|--all)>' && s:SystemGit('diff --cached --stat') =~ '^\(\s\|\n\)*$'
+        let args .= ' -a'
+    endif
+
     " Create COMMIT_EDITMSG file
     let editor_save = $EDITOR
     let $EDITOR = ''
-    let git_output = s:SystemGit('commit ' . a:args)
+    let git_output = s:SystemGit('commit ' . args)
     let $EDITOR = editor_save
 
     execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, git_dir)
     setlocal filetype=git-status bufhidden=wipe
     augroup GitCommit
         autocmd BufWritePre  <buffer> g/^#\|^\s*$/d | setlocal fileencoding=utf-8
-        execute printf("autocmd BufWritePost <buffer> call GitDoCommand('commit %s -F ' . expand('%%')) | autocmd! GitCommit * <buffer>", a:args)
+        execute printf("autocmd BufWritePost <buffer> call GitDoCommand('commit %s -F ' . expand('%%')) | autocmd! GitCommit * <buffer>", args)
     augroup END
 endfunction
 
