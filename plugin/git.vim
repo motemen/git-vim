@@ -173,6 +173,34 @@ function! GitCatFile(file)
     call <SID>OpenGitBuffer(git_output)
 endfunction
 
+" Show revision and author for each line.
+function! GitBlame()
+    let git_output = s:SystemGit('blame -- ' . expand('%'))
+    if !strlen(git_output)
+        echo "No output from git command"
+        return
+    endif
+
+    setlocal noscrollbind
+
+    " :/
+    let git_command_edit_save = g:git_command_edit
+    let g:git_command_edit = 'leftabove vnew'
+    call <SID>OpenGitBuffer(git_output)
+    let g:git_command_edit = git_command_edit_save
+
+    setlocal modifiable
+    silent %s/\d\d\d\d\zs \+\d\+).*//
+    vertical resize 20
+    setlocal nomodifiable
+    setlocal nowrap scrollbind
+
+    wincmd p
+    setlocal nowrap scrollbind
+
+    syncbind
+endfunction
+
 function! GitDoCommand(args)
     let git_output = s:SystemGit(a:args)
     let git_output = substitute(git_output, '\n*$', '', '')
@@ -265,6 +293,7 @@ command! -nargs=? GitAdd              call GitAdd(<q-args>)
 command! -nargs=* GitLog              call GitLog(<q-args>)
 command! -nargs=* GitCommit           call GitCommit(<q-args>)
 command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
+command!          GitBlame            call GitBlame()
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
