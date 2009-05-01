@@ -10,6 +10,14 @@ if !exists('g:git_bin')
     let g:git_bin = 'git'
 endif
 
+if !exists('g:git_author_highlight')
+    let g:git_author_highlight = { }
+endif
+
+if !exists('g:git_highlight_blame')
+    let g:git_highlight_blame = 0
+endif
+
 nnoremap <Leader>gd :GitDiff<Enter>
 nnoremap <Leader>gD :GitDiff --cached<Enter>
 nnoremap <Leader>gs :GitStatus<Enter>
@@ -195,10 +203,45 @@ function! GitBlame()
     setlocal nomodifiable
     setlocal nowrap scrollbind
 
+    if g:git_highlight_blame
+        call s:DoHighlightGitBlame()
+    endif
+
     wincmd p
     setlocal nowrap scrollbind
 
     syncbind
+endfunction
+
+" Experimental
+function! s:DoHighlightGitBlame()
+    for l in range(1, line('$'))
+        let line = getline(l)
+        let [commit, author] = matchlist(line, '\(\x\+\) (\(.\{-}\)\s* \d\d\d\d-\d\d-\d\d')[1:2]
+        let syntax_name = s:LoadSyntaxRuleFor({ 'author': author })
+        execute 'syntax match' syntax_name '+\%' . l . 'l.*+'
+    endfor
+endfunction
+
+function! s:LoadSyntaxRuleFor(params)
+    let author = a:params.author
+    let name = 'gitBlameAuthor_' . substitute(author, '\s', '_', 'g')
+    if (!hlID(name))
+        if has_key(g:git_author_highlight, author)
+            execute 'highlight' name g:git_author_highlight[author]
+        else
+            let [n1, n2] = [0, 1]
+            for c in split(author, '\zs')
+                let n1 = (n1 + char2nr(c))     % 8
+                let n2 = (n2 + char2nr(c) * 3) % 8
+            endfor
+            if n1 == n2
+                let n1 = (n2 + 1) % 8
+            endif
+            execute 'highlight' name printf('ctermfg=%d ctermbg=%d', n1, n2)
+        endif
+    endif
+    return name
 endfunction
 
 function! GitDoCommand(args)
