@@ -218,8 +218,7 @@ function! s:DoHighlightGitBlame()
     for l in range(1, line('$'))
         let line = getline(l)
         let [commit, author] = matchlist(line, '\(\x\+\) (\(.\{-}\)\s* \d\d\d\d-\d\d-\d\d')[1:2]
-        let syntax_name = s:LoadSyntaxRuleFor({ 'author': author })
-        execute 'syntax match' syntax_name '+\%' . l . 'l.*+'
+        call s:LoadSyntaxRuleFor({ 'author': author })
     endfor
 endfunction
 
@@ -240,8 +239,8 @@ function! s:LoadSyntaxRuleFor(params)
             endif
             execute 'highlight' name printf('ctermfg=%d ctermbg=%d', n1, n2)
         endif
+        execute 'syntax match' name '"\V\^\x\+ (' . escape(author, '\') . '\.\*"'
     endif
-    return name
 endfunction
 
 function! GitDoCommand(args)
