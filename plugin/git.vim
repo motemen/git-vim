@@ -17,6 +17,7 @@ nnoremap <Leader>gl :GitLog<Enter>
 nnoremap <Leader>ga :GitAdd<Enter>
 nnoremap <Leader>gA :GitAdd <cfile><Enter>
 nnoremap <Leader>gc :GitCommit<Enter>
+nnoremap <Leader>gp :GitPullRebase<Enter>
 
 " Ensure b:git_dir exists.
 function! s:GetGitDir()
@@ -142,10 +143,27 @@ function! GitCheckout(args)
     call GitDoCommand('checkout ' . a:args)
 endfunction
 
+" Push.
+function! GitPush(args)
+"   call GitDoCommand('push ' . a:args)
+    " Wanna see progress...
+    let args = a:args
+    if args =~ '^\s*$'
+        let args = 'origin ' . GitBranch()
+    endif
+    execute '!' g:git_bin 'push' args
+endfunction
+
+" Pull.
+function! GitPull(args)
+"   call GitDoCommand('pull ' . a:args)
+    " Wanna see progress...
+    execute '!' g:git_bin 'pull' a:args
+endfunction
+
 " Show commit, tree, blobs.
 function! GitCatFile(file)
     let file = s:Expand(a:file)
-    "let file_type  = s:SystemGit('cat-file -t ' . file)
     let git_output = s:SystemGit('cat-file -p ' . file)
     if !strlen(git_output)
         echo "No output from git command"
@@ -250,3 +268,6 @@ command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
+command!          GitPull             call GitPull(<q-args>)
+command!          GitPullRebase       call GitPull('--rebase')
+command!          GitPush             call GitPush('')
