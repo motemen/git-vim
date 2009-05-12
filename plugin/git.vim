@@ -18,14 +18,16 @@ if !exists('g:git_highlight_blame')
     let g:git_highlight_blame = 0
 endif
 
-nnoremap <Leader>gd :GitDiff<Enter>
-nnoremap <Leader>gD :GitDiff --cached<Enter>
-nnoremap <Leader>gs :GitStatus<Enter>
-nnoremap <Leader>gl :GitLog<Enter>
-nnoremap <Leader>ga :GitAdd<Enter>
-nnoremap <Leader>gA :GitAdd <cfile><Enter>
-nnoremap <Leader>gc :GitCommit<Enter>
-nnoremap <Leader>gp :GitPullRebase<Enter>
+if !exists('g:git_no_map_default') || !g:git_no_map_default
+    nnoremap <Leader>gd :GitDiff<Enter>
+    nnoremap <Leader>gD :GitDiff --cached<Enter>
+    nnoremap <Leader>gs :GitStatus<Enter>
+    nnoremap <Leader>gl :GitLog<Enter>
+    nnoremap <Leader>ga :GitAdd<Enter>
+    nnoremap <Leader>gA :GitAdd <cfile><Enter>
+    nnoremap <Leader>gc :GitCommit<Enter>
+    nnoremap <Leader>gp :GitPullRebase<Enter>
+endif
 
 " Ensure b:git_dir exists.
 function! s:GetGitDir()
