@@ -43,8 +43,8 @@ endfunction
 function! GitBranch()
     let git_dir = <SID>GetGitDir()
 
-    if strlen(git_dir) && filereadable(git_dir . 'HEAD')
-        let lines = readfile(git_dir . 'HEAD')
+    if strlen(git_dir) && filereadable(git_dir . '/HEAD')
+        let lines = readfile(git_dir . '/HEAD')
         return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
     else
         return ''
