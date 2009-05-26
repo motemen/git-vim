@@ -47,7 +47,11 @@ function! GitBranch()
 
     if strlen(git_dir) && filereadable(git_dir . 'HEAD')
         let lines = readfile(git_dir . 'HEAD')
-        return len(lines) ? matchstr(lines[0], '[^/]*$') : ''
+        if !len(lines)
+            return ''
+        else
+            return matchstr(lines[0], 'refs/heads/\zs.\+$')
+        endif
     else
         return ''
     endif
