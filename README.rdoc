@@ -31,3 +31,6 @@ Git-vim provides:
 
 === In git-status buffer
 [<Enter>]    :GitAdd <cfile>
+
+== License
+The MIT License

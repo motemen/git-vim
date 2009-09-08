@@ -1,3 +1,7 @@
+" Author:  motemen <motemen@gmail.com>
+" License: The MIT License
+" URL:     http://github.com/motemen/git-vim/
+
 if !exists('g:git_command_edit')
     let g:git_command_edit = 'new'
 endif
