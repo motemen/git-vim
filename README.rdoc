@@ -28,6 +28,8 @@ Git-vim provides:
 [<Leader>ga] :GitAdd
 [<Leader>gA] :GitAdd <cfile>
 [<Leader>gc] :GitCommit
+[<Leader>gp] :GitPush
+[<Leader>gP] :GitPullRebase
 
 === In git-status buffer
 [<Enter>]    :GitAdd <cfile>
