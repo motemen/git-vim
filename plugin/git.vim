@@ -196,11 +196,16 @@ function! GitCatFile(file)
 endfunction
 
 " Show revision and author for each line.
-function! GitBlame()
+function! GitBlame(...)
+    let l:git_blame_width = 20
     let git_output = s:SystemGit('blame -- ' . expand('%'))
     if !strlen(git_output)
         echo "No output from git command"
         return
+    endif
+
+    if strlen(a:1)
+        let l:git_blame_width = a:1
     endif
 
     setlocal noscrollbind
@@ -213,7 +218,7 @@ function! GitBlame()
 
     setlocal modifiable
     silent %s/\d\d\d\d\zs \+\d\+).*//
-    vertical resize 20
+    exe 'vertical resize ' . git_blame_width
     setlocal nomodifiable
     setlocal nowrap scrollbind
 
@@ -226,6 +231,9 @@ function! GitBlame()
 
     syncbind
 endfunction
+
+
+
 
 " Experimental
 function! s:DoHighlightGitBlame()
@@ -355,7 +363,7 @@ command! -nargs=? GitAdd              call GitAdd(<q-args>)
 command! -nargs=* GitLog              call GitLog(<q-args>)
 command! -nargs=* GitCommit           call GitCommit(<q-args>)
 command! -nargs=1 GitCatFile          call GitCatFile(<q-args>)
-command!          GitBlame            call GitBlame()
+command! -nargs=? GitBlame            call GitBlame(<q-args>)
 command! -nargs=+ Git                 call GitDoCommand(<q-args>)
 command!          GitVimDiffMerge     call GitVimDiffMerge()
 command!          GitVimDiffMergeDone call GitVimDiffMergeDone()
