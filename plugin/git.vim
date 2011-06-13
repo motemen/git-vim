@@ -93,7 +93,7 @@ endfunction
 
 " Show diff.
 function! GitDiff(args)
-    let git_output = s:SystemGit('diff ' . a:args . ' -- ' . s:Expand('%'))
+    let git_output = s:SystemGit('diff --no-ext-diff' . a:args . ' -- ' . s:Expand('%'))
     if !strlen(git_output)
         echo "No output from git command"
         return
@@ -138,7 +138,7 @@ function! GitCommit(args)
 
     let args = a:args
 
-    if args !~ '\v\k@<!(-a|--all)>' && s:SystemGit('diff --cached --stat') =~ '^\(\s\|\n\)*$'
+    if args !~ '\v\k@<!(-a|--all)>' && s:SystemGit('diff --no-ext-diff --cached --stat') =~ '^\(\s\|\n\)*$'
         let args .= ' -a'
     endif
 
