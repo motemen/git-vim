@@ -38,7 +38,7 @@ function! s:GetGitDir()
     if !exists('b:git_dir')
         let b:git_dir = s:SystemGit('rev-parse --git-dir')
         if !v:shell_error
-            let b:git_dir = fnamemodify(split(b:git_dir, "\n")[0], ':p') . '/'
+            let b:git_dir = fnamemodify(split(b:git_dir, "\n")[0], ':p')
         endif
     endif
     return b:git_dir
@@ -149,7 +149,7 @@ function! GitCommit(args)
     let $EDITOR = editor_save
 
     let cur_dir = getcwd()
-    execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, git_dir)
+    execute printf('%s %s/COMMIT_EDITMSG', g:git_command_edit, git_dir)
     execute printf("lcd %s", cur_dir)
 
     setlocal filetype=git-status bufhidden=wipe
