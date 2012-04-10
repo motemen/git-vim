@@ -31,6 +31,7 @@ if !exists('g:git_no_map_default') || !g:git_no_map_default
     nnoremap <Leader>gA :GitAdd <cfile><Enter>
     nnoremap <Leader>gc :GitCommit<Enter>
     nnoremap <Leader>gp :GitPullRebase<Enter>
+    nnoremap <Leader>gb :GitBlame<Enter>
 endif
 
 " Ensure b:git_dir exists.
@@ -197,15 +198,17 @@ endfunction
 
 " Show revision and author for each line.
 function! GitBlame(...)
-    let l:git_blame_width = 20
     let git_output = s:SystemGit('blame -- ' . expand('%'))
     if !strlen(git_output)
         echo "No output from git command"
         return
     endif
 
+    let l:git_blame_width = 20
     if strlen(a:1)
         let l:git_blame_width = a:1
+    elseif exists('g:git_blame_width') && g:git_blame_width
+        let l:git_blame_width = g:git_blame_width
     endif
 
     setlocal noscrollbind
@@ -231,9 +234,6 @@ function! GitBlame(...)
 
     syncbind
 endfunction
-
-
-
 
 " Experimental
 function! s:DoHighlightGitBlame()
