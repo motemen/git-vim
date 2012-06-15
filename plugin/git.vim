@@ -110,7 +110,7 @@ function! GitStatus()
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-status
     nnoremap <buffer> <Enter> :GitAdd <cfile><Enter>:call <SID>RefreshGitStatus()<Enter>
-    nnoremap <buffer> -       :silent !git reset HEAD -- =expand('<cfile>')<Enter><Enter>:call <SID>RefreshGitStatus()<Enter>
+    nnoremap <buffer> -       :call GitDoCommand('reset '. 'HEAD ' . expand('<cfile>'))<Enter>:call <SID>RefreshGitStatus()<Enter>
 endfunction
 
 function! s:RefreshGitStatus()
