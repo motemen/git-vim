@@ -1,5 +1,7 @@
 = git.vim
 
+This project is no longer maintained. You may want to use {tpope/vim-fugitive}[https://github.com/tpope/vim-fugitive].
+
 == Introduction
 Git-vim provides:
 * Plugin files for calling git functions from inside Vim
