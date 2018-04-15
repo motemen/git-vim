@@ -37,11 +37,14 @@ Git-vim provides:
 :GitDiff <args>
     git-diff. Completes git commits.
 
+:GitVimDiff <args>
+    git-diff in vimdiff mode.
+
 :GitPull <args>
     git-pull.
 
 :GitPullRebase
-    git-pull —rebase.
+    git-pull --rebase.
 
 :GitPush <args>
     git-push. Defaults to +git push origin <current-branch>+.
@@ -65,7 +68,7 @@ Git-vim provides:
     :GitDiff
 
 <Leader>gD
-    :GitDiff —cached
+    :GitDiff --cached
 
 <Leader>gs
     :GitStatus

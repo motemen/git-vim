@@ -24,6 +24,8 @@ endif
 
 if !exists('g:git_no_map_default') || !g:git_no_map_default
     nnoremap <Leader>gd :GitDiff<Enter>
+    nnoremap <Leader>gvd :GitVimDiff<Enter>
+    nnoremap <Leader>gvD :GitVimDiff --cached<Enter>
     nnoremap <Leader>gD :GitDiff --cached<Enter>
     nnoremap <Leader>gs :GitStatus<Enter>
     nnoremap <Leader>gl :GitLog<Enter>
@@ -43,6 +45,16 @@ function! s:GetGitDir()
         endif
     endif
     return b:git_dir
+endfunction
+
+" Ensure b:git_dir exists.
+function! s:GetRepositoryPath(fname)
+    let git_dir = fnamemodify(<SID>GetGitDir(), ":p:h:h")
+    let fpath = fnamemodify(a:fname, ":p")
+    if has('win32')
+        let fpath = substitute(fpath, '\', '/', 'g')
+    endif
+    return strpart(fpath, strlen(git_dir)+1, strlen(fpath) - strlen(git_dir)-1)
 endfunction
 
 " Returns current git branch.
@@ -94,14 +106,66 @@ endfunction
 
 " Show diff.
 function! GitDiff(args)
-    let git_output = s:SystemGit('diff ' . a:args . ' -- ' . s:Expand('%'))
+    let file = s:Expand('%')
+    let encoding = &encoding
+    if &encoding != &termencoding
+	let file = iconv(file, &encoding, &termencoding)
+	let &encoding = &termencoding
+    endif
+    let git_output = s:SystemGit('diff ' . a:args . ' -- ' . shellescape(file))
+    let &encoding = encoding
     if !strlen(git_output)
         echo "No output from git command"
         return
     endif
+    let git_output = substitute(git_output, '\r\n','\n', 'g')
+    if &fenc != &enc
+	let pos_diff = match(git_output, '\n@@')
+	let git_output_file = strpart(git_output, 0, pos_diff) 
+	let git_output = iconv(strpart(git_output, pos_diff), &fenc, &enc)
+	let git_output = git_output_file . git_output
+    endif
 
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-diff
+endfunction
+
+" Show vimdiff.
+function! GitVimDiff(args)
+    let file = s:Expand('%')
+    let encoding = &encoding
+    if &encoding != &termencoding
+	let file = iconv(file, &encoding, &termencoding)
+	let &encoding = &termencoding
+    endif
+    let git_output = s:SystemGit('cat-file -p ' . a:args . shellescape(':' . s:GetRepositoryPath(file)))
+
+    let &encoding = encoding
+    echo 'cat-file -p ' . a:args . ':' . s:GetRepositoryPath(s:Expand('%'))
+
+    if !strlen(git_output)
+        echo "No output from git command"
+        return
+    endif
+    let filetype = &filetype
+
+    diffthis
+
+    let git_command_edit_save = g:git_command_edit
+    let g:git_command_edit = 'vnew'
+
+    if &encoding != &fenc
+	let git_output = iconv(git_output, &fenc, &encoding)
+    endif
+    let git_output = substitute(git_output, '\r\n','\n', 'g')
+    let fenc = &fenc
+    call <SID>OpenGitBuffer(git_output)
+    let g:git_command_edit = git_command_edit_save
+    let &filetype = filetype
+    setlocal modifiable
+    let &fenc=fenc
+    setlocal nomodifiable
+    diffthis
 endfunction
 
 " Show Status.
@@ -121,7 +185,14 @@ endfunction
 
 " Show Log.
 function! GitLog(args)
-    let git_output = s:SystemGit('log ' . a:args . ' -- ' . s:Expand('%'))
+    let file = s:Expand('%')
+    let encoding = &encoding
+    if &encoding != &termencoding
+	let file = iconv(file, &encoding, &termencoding)
+	let &encoding = &termencoding
+    endif
+    let git_output = s:SystemGit('log ' . a:args . ' -- ' . shellescape(file))
+    let &encoding = encoding
     call <SID>OpenGitBuffer(git_output)
     setlocal filetype=git-log
 endfunction
@@ -129,8 +200,14 @@ endfunction
 " Add file to index.
 function! GitAdd(expr)
     let file = s:Expand(strlen(a:expr) ? a:expr : '%')
+    let encoding = &encoding
+    if &encoding != &termencoding
+	let file = iconv(file, &encoding, &termencoding)
+	let &encoding = &termencoding
+    endif
 
-    call GitDoCommand('add ' . file)
+    call GitDoCommand('add ' . shellescape(file))
+    let &encoding = encoding
 endfunction
 
 " Commit.
@@ -187,18 +264,35 @@ endfunction
 " Show commit, tree, blobs.
 function! GitCatFile(file)
     let file = s:Expand(a:file)
-    let git_output = s:SystemGit('cat-file -p ' . file)
+    let encoding = &encoding
+    if &encoding != &termencoding
+	let file = iconv(file, &encoding, &termencoding)
+	let &encoding = &termencoding
+    endif
+    let git_output = s:SystemGit('cat-file -p ' . shellescape(file))
+    let &encoding = encoding
     if !strlen(git_output)
         echo "No output from git command"
         return
     endif
 
+    if &encoding != &fenc
+	let git_output = iconv(git_output, &fenc, &encoding)
+    endif
+    let git_output = substitute(git_output, '\r\n','\n', 'g')
     call <SID>OpenGitBuffer(git_output)
 endfunction
 
 " Show revision and author for each line.
 function! GitBlame(...)
-    let git_output = s:SystemGit('blame -- ' . expand('%'))
+    let file = s:Expand('%')
+    let encoding = &encoding
+    if &encoding != &termencoding
+	let file = iconv(file, &encoding, &termencoding)
+	let &encoding = &termencoding
+    endif
+    let git_output = s:SystemGit('blame -- ' . shellescape(file))
+    let &encoding = encoding
     if !strlen(git_output)
         echo "No output from git command"
         return
@@ -358,6 +452,7 @@ endfunction
 
 command! -nargs=1 -complete=customlist,ListGitCommits GitCheckout call GitCheckout(<q-args>)
 command! -nargs=* -complete=customlist,ListGitCommits GitDiff     call GitDiff(<q-args>)
+command! -nargs=* -complete=customlist,ListGitCommits GitVimDiff     call GitVimDiff(<q-args>)
 command!          GitStatus           call GitStatus()
 command! -nargs=? GitAdd              call GitAdd(<q-args>)
 command! -nargs=* GitLog              call GitLog(<q-args>)

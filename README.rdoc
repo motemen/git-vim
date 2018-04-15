@@ -14,6 +14,7 @@ Git-vim provides:
 [:GitLog]              Show git-log of current file or repository.
 [:GitCheckout <args>]  git-checkout. Completes git commits.
 [:GitDiff <args>]      git-diff. Completes git commits.
+[:GitVimDiff <args>]   git-diff in vimdiff mode.
 [:GitPull <args>]      git-pull.
 [:GitPullRebase]       git-pull --rebase.
 [:GitPush <args>]      git-push. Defaults to +git push origin <current-branch>+.
