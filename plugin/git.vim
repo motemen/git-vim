@@ -150,7 +150,7 @@ function! GitCommit(args)
     let $EDITOR = editor_save
 
     let cur_dir = getcwd()
-    execute printf('%s %sCOMMIT_EDITMSG', g:git_command_edit, git_dir)
+    execute printf('%s %s/COMMIT_EDITMSG', g:git_command_edit, git_dir)
     execute printf("lcd %s", cur_dir)
 
     setlocal filetype=git-status bufhidden=wipe
